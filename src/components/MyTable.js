@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Table } from "react-bootstrap";
 
-var MyTable = () => {
+var MyTable = (props) => {
+  const panelRef = useRef(null);
+  useOutsideAlerter(panelRef);
+
   let [panel, setPanel] = useState([
     ["S", "O", "L", "A"],
     ["R", "P", "A", "N"],
@@ -9,14 +12,29 @@ var MyTable = () => {
     ["L", "A", "R", "R"],
   ]);
 
-  const [bgColor, setbgColor] = useState("white");
-
-  const colorHandler = () => {
-    setbgColor("green");
-  };
+  const [flag, setflag] = useState(false);
+  function useOutsideAlerter(ref) {
+    useEffect(() => {
+      function handleClickOutside(event) {
+        const sx = 1;
+        const ex = 2;
+        const sy = 2;
+        const ey = 4;
+        if (ref.current && !ref.current.contains(event.target)) {
+          const newpanel = panel
+            .slice(sx, ex + 1)
+            .map((i) => i.slice(sy, ey + 1));
+          setPanel(newpanel);
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [ref]);
+  }
 
   const handleRowColAddition = (i, j) => {
-    console.log(i, j);
     if (j === 0) {
       let state = [...panel];
 
@@ -47,35 +65,26 @@ var MyTable = () => {
         return (
           <td
             id={j}
-            style={{ backgroundColor: bgColor }}
             onClick={() => {
               handleRowColAddition(i, j);
+              setflag(true);
             }}
           >
             {element}
           </td>
         );
       });
-      return (
-        <tr
-          id={i}
-          onClick={() => {
-            colorHandler();
-          }}
-        >
-          {entry}
-        </tr>
-      );
+      return <tr id={i}>{entry}</tr>;
     });
     return (
-      <Table>
+      <Table className={flag ? "border table-dark" : ""}>
         <tbody>{rows}</tbody>
       </Table>
     );
   }
   return (
     <>
-      <div>{renderTable()}</div>
+      <div ref={panelRef}>{renderTable()}</div>
     </>
   );
 };
