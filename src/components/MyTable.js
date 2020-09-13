@@ -12,7 +12,7 @@ var MyTable = () => {
   const [bgColor, setbgColor] = useState("white");
 
   const colorHandler = () => {
-    setbgColor("black");
+    setbgColor("green");
   };
 
   const handleRowColAddition = (i, j) => {
